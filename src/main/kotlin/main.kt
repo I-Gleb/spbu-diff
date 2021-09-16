@@ -1,5 +1,7 @@
+import java.lang.Integer.max
+
 /*
- * Получает параметры командной строки. При необходимости запрашивает данные у пользователя.
+ * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
  * Производится считываение и обработка входных даныых.
  * Функция возращает два сравниваемых файла.
  */
@@ -7,6 +9,45 @@ fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
     TODO()
 }
 
+/*
+ * Принимает две последовательности.
+ * Возращает их наибольшую общую подпоследовательность.
+ */
+fun longestCommonSubsequence(a : List<Any>, b : List<Any>): List<Any> {
+    // prefixesLCS[i][j] будет хранить длину наибольшей общей подпоследовательности
+    // префикса а длины i и префикса b длины j
+    val prefixesLCS = List(a.size + 1) { MutableList(b.size + 1) {0} }
+
+    // насчитываем значения prefixesLCS
+    for (i in a.indices) {
+        for (j in b.indices) {
+            prefixesLCS[i + 1][j + 1] =
+                if (a[i] == b[j]) prefixesLCS[i][j] + 1 else max(prefixesLCS[i][j + 1], prefixesLCS[i + 1][j])
+        }
+    }
+
+    // построим LCS(a, b) c конца
+    // currI, currJ - префиксы a и b соответвенно, LCS для которых строится в данный момент
+    val LCS = mutableListOf<Any>()
+    var currI = a.size
+    var currJ = b.size
+
+    while (currI != 0 && currJ != 0) {
+        when {
+            prefixesLCS[currI][currJ] == prefixesLCS[currI - 1][currJ] -> currI--
+            prefixesLCS[currI][currJ] == prefixesLCS[currI][currJ - 1] -> currJ--
+            else -> {
+                LCS.add(a[currI - 1])
+                currI--
+                currJ--
+            }
+        }
+    }
+    // мы построили LCS c конца, теперь осталось развернуть полученную последовательность
+    LCS.reverse()
+
+    return LCS.toList()
+}
 
 /*
  * Получает два файла
@@ -19,13 +60,12 @@ fun findChanges(originalFile : List<String>, updatedFile : List<String>): List<P
 
 
 /*
- * Получает файл-сравнение.
+ * Принимает файл-сравнение.
  * Выводит разницу между файлами по файлу-сравнению.
  */
 fun printDifference(comparisonFile : List<Pair<Int, String> >) {
     TODO()
 }
-
 
 fun main(args: Array<String>) {
     // получили входные файлы
