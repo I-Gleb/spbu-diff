@@ -13,25 +13,26 @@ fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
  * Принимает две последовательности.
  * Возращает их наибольшую общую подпоследовательность.
  */
-fun longestCommonSubsequence(a : List<Any>, b : List<Any>): List<Any> {
+fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
     // prefixesLCS[i][j] будет хранить длину наибольшей общей подпоследовательности
     // префикса а длины i и префикса b длины j
-    val prefixesLCS = List(a.size + 1) { MutableList(b.size + 1) {0} }
-
-    // насчитываем значения prefixesLCS
-    for (i in a.indices) {
-        for (j in b.indices) {
-            prefixesLCS[i + 1][j + 1] =
-                if (a[i] == b[j]) prefixesLCS[i][j] + 1 else max(prefixesLCS[i][j + 1], prefixesLCS[i + 1][j])
+    fun calcPrefixesLCS(): List<MutableList<Int> > {
+        val prefixesLCS = List(a.size + 1) { MutableList(b.size + 1) {0} }
+        for (i in a.indices) {
+            for (j in b.indices) {
+                prefixesLCS[i + 1][j + 1] =
+                    if (a[i] == b[j]) prefixesLCS[i][j] + 1 else max(prefixesLCS[i][j + 1], prefixesLCS[i + 1][j])
+            }
         }
+        return prefixesLCS
     }
 
-    // построим LCS(a, b) c конца
-    // currI, currJ - префиксы a и b соответвенно, LCS для которых строится в данный момент
+    val prefixesLCS = calcPrefixesLCS()
     val LCS = mutableListOf<Any>()
     var currI = a.size
     var currJ = b.size
-
+    // строим LCS(a, b) c конца
+    // currI, currJ - префиксы a и b соответвенно, LCS для которых строится в данный момент
     while (currI != 0 && currJ != 0) {
         when {
             prefixesLCS[currI][currJ] == prefixesLCS[currI - 1][currJ] -> currI--
