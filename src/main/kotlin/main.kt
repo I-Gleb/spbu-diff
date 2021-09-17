@@ -1,3 +1,4 @@
+import java.io.File
 import java.lang.Integer.max
 
 /*
@@ -6,7 +7,7 @@ import java.lang.Integer.max
  * Функция возращает два сравниваемых файла.
  */
 fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
-    TODO()
+    return Pair(File(args[0]).bufferedReader().readLines(), File(args[1]).bufferedReader().readLines())
 }
 
 /*
