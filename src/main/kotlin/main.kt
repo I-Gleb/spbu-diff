@@ -28,7 +28,7 @@ fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
     }
 
     val prefixesLCS = calcPrefixesLCS()
-    val LCS = mutableListOf<Any>()
+    val lcs = mutableListOf<Any>()
     var currI = a.size
     var currJ = b.size
     // строим LCS(a, b) c конца
@@ -38,16 +38,16 @@ fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
             prefixesLCS[currI][currJ] == prefixesLCS[currI - 1][currJ] -> currI--
             prefixesLCS[currI][currJ] == prefixesLCS[currI][currJ - 1] -> currJ--
             else -> {
-                LCS.add(a[currI - 1])
+                lcs.add(a[currI - 1])
                 currI--
                 currJ--
             }
         }
     }
     // мы построили LCS c конца, теперь осталось развернуть полученную последовательность
-    LCS.reverse()
+    lcs.reverse()
 
-    return LCS.toList()
+    return lcs.toList()
 }
 
 /*
