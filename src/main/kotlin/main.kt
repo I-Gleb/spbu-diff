@@ -57,7 +57,38 @@ fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
  * Функция возращает файл-сравнение, в котором у каждой строки есть пометка о её статусе
  */
 fun findChanges(originalFile : List<String>, updatedFile : List<String>): List<Pair<Int, String> > {
-    TODO()
+    val lcs = longestCommonSubseq(originalFile, updatedFile)
+    val comparisonFile = mutableListOf<Pair<Int, String> >()
+    // будем идти двумя указателями, currI по originalFile, currJ по updatedFile
+    var currI = 0
+    var currJ = 0
+    for (commonLine in lcs) {
+        // добавляем в файл-сравенение удалённые строки
+        while (originalFile[currI] != commonLine) {
+            comparisonFile.add(Pair(-1, originalFile[currI]))
+            ++currI
+        }
+        // добавляем в файл-сравнение добаленные строки
+        while (updatedFile[currJ] != commonLine) {
+            comparisonFile.add(Pair(1, updatedFile[currJ]))
+            ++currJ
+        }
+        // добавляем в файл-сравнение неизменную строку
+        comparisonFile.add(Pair(0, commonLine))
+        ++currI
+        ++currJ
+    }
+    // добавляем в файл-сравенение удалённые строки после последней общей строки
+    while (currI < originalFile.size) {
+        comparisonFile.add(Pair(-1, originalFile[currI]))
+        ++currI
+    }
+    // добавляем в файл-сравнение добаленные строки после последней общей строки
+    while (currJ < updatedFile.size) {
+        comparisonFile.add(Pair(1, updatedFile[currJ]))
+        ++currJ
+    }
+    return comparisonFile.toList()
 }
 
 

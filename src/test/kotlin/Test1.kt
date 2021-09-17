@@ -22,4 +22,12 @@ internal class Test1 {
         File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
         assertEquals(processInput(arrayOf("a.txt", "b.txt")), Pair(a, b))
     }
+
+    @Test
+    fun testFindChanges() {
+        val a = listOf("a", "b", "c")
+        val b = listOf("a", "d", "c", "e")
+        val diff = listOf(Pair(0, "a"), Pair(-1, "b"), Pair(1, "d"), Pair(0, "c"), Pair(1, "e"))
+        assertEquals(findChanges(a, b), diff)
+    }
 }
