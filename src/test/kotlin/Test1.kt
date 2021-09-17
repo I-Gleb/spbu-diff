@@ -1,3 +1,4 @@
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintStream
@@ -26,6 +27,16 @@ internal class Test1 {
         File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line + "\n") }
         File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
         assertEquals(processInput(arrayOf("a.txt", "b.txt")), Pair(a, b))
+    }
+
+    @Test
+    fun testInputFromConsole() {
+        val a = listOf("a", "b", "c")
+        val b = listOf("a", "d", "c", "e")
+        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line + "\n") }
+        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
+        System.setIn(ByteArrayInputStream("a.txt\nb.txt\n".toByteArray()))
+        assertEquals(processInput(arrayOf()), Pair(a, b))
     }
 
     @Test

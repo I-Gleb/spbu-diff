@@ -7,7 +7,16 @@ import java.lang.Integer.max
  * Функция возращает два сравниваемых файла.
  */
 fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
-    return Pair(File(args[0]).bufferedReader().readLines(), File(args[1]).bufferedReader().readLines())
+    if (args.isNotEmpty()) {
+        return Pair(File(args[0]).bufferedReader().readLines(), File(args[1]).bufferedReader().readLines())
+    }
+    else {
+        println("Enter path to the first file:")
+        val path1 = readLine()!!
+        println("Enter path to the second file:")
+        val path2 = readLine()!!
+        return Pair(File(path1).bufferedReader().readLines(), File(path2).bufferedReader().readLines())
+    }
 }
 
 /*
