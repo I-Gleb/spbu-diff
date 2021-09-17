@@ -1,7 +1,12 @@
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.PrintStream
 import kotlin.test.*
 
 internal class Test1 {
+    private val standardOut = System.out
+    private val standardIn = System.`in`
+    private val stream = ByteArrayOutputStream()
 
     @Test
     fun testLCS() {
@@ -17,7 +22,7 @@ internal class Test1 {
     @Test
     fun testInputFromParameters() {
         val a = listOf("a", "b", "c")
-        val b = listOf("a", "d", "c", "b")
+        val b = listOf("a", "d", "c", "e")
         File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line + "\n") }
         File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
         assertEquals(processInput(arrayOf("a.txt", "b.txt")), Pair(a, b))
@@ -29,5 +34,16 @@ internal class Test1 {
         val b = listOf("a", "d", "c", "e")
         val diff = listOf(Pair(0, "a"), Pair(-1, "b"), Pair(1, "d"), Pair(0, "c"), Pair(1, "e"))
         assertEquals(findChanges(a, b), diff)
+    }
+
+    @Test
+    fun testPrintDiff() {
+        System.setOut(PrintStream(stream))
+
+        val diff = listOf(Pair(0, "a"), Pair(-1, "b"), Pair(1, "d"), Pair(0, "c"), Pair(1, "e"))
+        printDifference(diff)
+        assertEquals(stream.toString(), "a\n-b\n+d\nc\n+e\n")
+
+        System.setOut(standardOut)
     }
 }

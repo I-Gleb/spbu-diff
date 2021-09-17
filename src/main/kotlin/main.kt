@@ -97,7 +97,10 @@ fun findChanges(originalFile : List<String>, updatedFile : List<String>): List<P
  * Выводит разницу между файлами по файлу-сравнению.
  */
 fun printDifference(comparisonFile : List<Pair<Int, String> >) {
-    TODO()
+    val mapForStatus = mapOf(-1 to "-", 0 to "", 1 to "+")
+    for ((status, line) in comparisonFile) {
+        print(mapForStatus[status] + line + "\n")
+    }
 }
 
 fun main(args: Array<String>) {
