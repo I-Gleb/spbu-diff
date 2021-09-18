@@ -159,4 +159,35 @@ internal class Test1 {
         File("a.txt").delete()
         File("b.txt").delete()
     }
+
+    @Test
+    fun testMainBig() {
+        val a = mutableListOf<Line>()
+        val b = mutableListOf<Line>()
+        val diffBuilder = StringBuilder()
+
+        for (i in 1..1000) {
+            a.add(Line("1"))
+            a.add(Line("2"))
+            a.add(Line("3"))
+
+            b.add(Line("1"))
+            b.add(Line("4"))
+            b.add(Line("3"))
+
+            diffBuilder.append("1\n-2\n+4\n3\n")
+        }
+        // a and b have 3000 elements each
+        // diff has 4000 lines
+
+        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
+        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
+
+        main(arrayOf("a.txt", "b.txt"))
+
+        assertEquals(stream.toString().trim().lines().joinToString("\n"), diffBuilder.toString().trim())
+
+        File("a.txt").delete()
+        File("b.txt").delete()
+    }
 }
