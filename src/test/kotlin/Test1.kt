@@ -27,6 +27,8 @@ internal class Test1 {
         File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line + "\n") }
         File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
         assertEquals(processInput(arrayOf("a.txt", "b.txt")), Pair(a, b))
+        File("a.txt").delete()
+        File("b.txt").delete()
     }
 
     @Test
@@ -37,6 +39,8 @@ internal class Test1 {
         File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
         System.setIn(ByteArrayInputStream("a.txt\nb.txt\n".toByteArray()))
         assertEquals(processInput(arrayOf()), Pair(a, b))
+        File("a.txt").delete()
+        File("b.txt").delete()
     }
 
     @Test

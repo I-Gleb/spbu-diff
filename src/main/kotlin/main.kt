@@ -1,5 +1,6 @@
 import java.io.File
 import java.lang.Integer.max
+import kotlin.system.exitProcess
 
 /*
  * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
@@ -7,15 +8,28 @@ import java.lang.Integer.max
  * Функция возращает два сравниваемых файла.
  */
 fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
+    val pathFirst:String?
+    val pathSecond:String?
     if (args.isNotEmpty()) {
-        return Pair(File(args[0]).bufferedReader().readLines(), File(args[1]).bufferedReader().readLines())
+        pathFirst = args[0]
+        pathSecond = if (args.size > 1) args[1] else null
     }
     else {
         println("Enter path to the first file:")
-        val path1 = readLine()!!
+        pathFirst = readLine()
         println("Enter path to the second file:")
-        val path2 = readLine()!!
-        return Pair(File(path1).bufferedReader().readLines(), File(path2).bufferedReader().readLines())
+        pathSecond = readLine()
+    }
+
+    val fileFirst = if (pathFirst != null) File(pathFirst) else null
+    val fileSecond = if (pathSecond != null) File(pathSecond) else null
+    if (fileFirst?.isFile == true && fileSecond?.isFile == true) {
+        return Pair(fileFirst.bufferedReader().readLines(),
+            fileSecond.bufferedReader().readLines())
+    }
+    else {
+        println("Incorrect paths to files")
+        exitProcess(1)
     }
 }
 
