@@ -11,7 +11,7 @@ data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
 /*
  * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
  * Производится считываение и обработка входных даныых.
- * Функция возращает два сравниваемых файла.
+ * Функция возращает два сравниваемых файла. Если ввод некорректен, то программа завершается с кодом 1 и сообщением пользователю
  */
 fun processInput(args: Array<String>): Pair<List<Line>, List<Line> > {
     val pathFirst:String?
@@ -81,9 +81,9 @@ fun <T> longestCommonSubseq(a : List<T>, b : List<T>): List<T> {
 }
 
 /*
- * Получает два файла
+ * Получает два файла.
  * Файлы сравниваются.
- * Функция возращает файл-сравнение, в котором у каждой строки есть пометка о её статусе
+ * Функция возращает файл-сравнение, в котором у каждой строки есть пометка о её статусе.
  */
 fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line> {
     val lcs = longestCommonSubseq(originalFile, updatedFile)
@@ -103,7 +103,7 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
             ++currJ
         }
         // добавляем в файл-сравнение неизменную строку
-        comparisonFile.add(Line(commonLine.s))
+        comparisonFile.add(commonLine)
         ++currI
         ++currJ
     }
@@ -137,12 +137,9 @@ fun printDifference(comparisonFile : List<Line>) {
 }
 
 fun main(args: Array<String>) {
-    // получили входные файлы
     val (originalFile, updatedFile) = processInput(args)
 
-    // постоили по ним файл-сравнение
     val comparisonFile = findChanges(originalFile, updatedFile)
 
-    // вывели отчёт об изменениях между файлами
     printDifference(comparisonFile)
 }
