@@ -2,12 +2,18 @@ import java.io.File
 import java.lang.Integer.max
 import kotlin.system.exitProcess
 
+enum class LineStatus {
+    Added, Deleted, NotChanged
+}
+
+data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
+
 /*
  * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
  * Производится считываение и обработка входных даныых.
  * Функция возращает два сравниваемых файла.
  */
-fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
+fun processInput(args: Array<String>): Pair<List<Line>, List<Line> > {
     val pathFirst:String?
     val pathSecond:String?
     if (args.isNotEmpty()) {
@@ -24,8 +30,8 @@ fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
     val fileFirst = if (pathFirst != null) File(pathFirst) else null
     val fileSecond = if (pathSecond != null) File(pathSecond) else null
     if (fileFirst?.isFile == true && fileSecond?.isFile == true) {
-        return Pair(fileFirst.bufferedReader().readLines(),
-            fileSecond.bufferedReader().readLines())
+        return Pair(fileFirst.bufferedReader().readLines().map {Line(it)},
+            fileSecond.bufferedReader().readLines().map {Line(it)})
     }
     else {
         println("Incorrect paths to files")
@@ -37,7 +43,7 @@ fun processInput(args: Array<String>): Pair<List<String>, List<String> > {
  * Принимает две последовательности.
  * Возращает их наибольшую общую подпоследовательность.
  */
-fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
+fun <T> longestCommonSubseq(a : List<T>, b : List<T>): List<T> {
     // prefixesLCS[i][j] будет хранить длину наибольшей общей подпоследовательности
     // префикса а длины i и префикса b длины j
     fun calcPrefixesLCS(): List<MutableList<Int> > {
@@ -52,7 +58,7 @@ fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
     }
 
     val prefixesLCS = calcPrefixesLCS()
-    val lcs = mutableListOf<Any>()
+    val lcs = mutableListOf<T>()
     var currI = a.size
     var currJ = b.size
     // строим LCS(a, b) c конца
@@ -79,36 +85,36 @@ fun longestCommonSubseq(a : List<Any>, b : List<Any>): List<Any> {
  * Файлы сравниваются.
  * Функция возращает файл-сравнение, в котором у каждой строки есть пометка о её статусе
  */
-fun findChanges(originalFile : List<String>, updatedFile : List<String>): List<Pair<Int, String> > {
+fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line> {
     val lcs = longestCommonSubseq(originalFile, updatedFile)
-    val comparisonFile = mutableListOf<Pair<Int, String> >()
+    val comparisonFile = mutableListOf<Line>()
     // будем идти двумя указателями, currI по originalFile, currJ по updatedFile
     var currI = 0
     var currJ = 0
     for (commonLine in lcs) {
         // добавляем в файл-сравенение удалённые строки
         while (originalFile[currI] != commonLine) {
-            comparisonFile.add(Pair(-1, originalFile[currI]))
+            comparisonFile.add(Line(originalFile[currI].s, LineStatus.Deleted))
             ++currI
         }
         // добавляем в файл-сравнение добаленные строки
         while (updatedFile[currJ] != commonLine) {
-            comparisonFile.add(Pair(1, updatedFile[currJ]))
+            comparisonFile.add(Line(updatedFile[currJ].s, LineStatus.Added))
             ++currJ
         }
         // добавляем в файл-сравнение неизменную строку
-        comparisonFile.add(Pair(0, commonLine))
+        comparisonFile.add(Line(commonLine.s))
         ++currI
         ++currJ
     }
     // добавляем в файл-сравенение удалённые строки после последней общей строки
     while (currI < originalFile.size) {
-        comparisonFile.add(Pair(-1, originalFile[currI]))
+        comparisonFile.add(Line(originalFile[currI].s, LineStatus.Deleted))
         ++currI
     }
     // добавляем в файл-сравнение добаленные строки после последней общей строки
     while (currJ < updatedFile.size) {
-        comparisonFile.add(Pair(1, updatedFile[currJ]))
+        comparisonFile.add(Line(updatedFile[currJ].s, LineStatus.Added))
         ++currJ
     }
     return comparisonFile.toList()
@@ -119,10 +125,14 @@ fun findChanges(originalFile : List<String>, updatedFile : List<String>): List<P
  * Принимает файл-сравнение.
  * Выводит разницу между файлами по файлу-сравнению.
  */
-fun printDifference(comparisonFile : List<Pair<Int, String> >) {
-    val mapForStatus = mapOf(-1 to "-", 0 to "", 1 to "+")
-    for ((status, line) in comparisonFile) {
-        print(mapForStatus[status] + line + "\n")
+fun printDifference(comparisonFile : List<Line>) {
+    val linePrefix = mapOf(
+        LineStatus.Deleted to "-",
+        LineStatus.NotChanged to "",
+        LineStatus.Added to "+"
+    )
+    for (line in comparisonFile) {
+        print(linePrefix[line.status] + line.s + "\n")
     }
 }
 

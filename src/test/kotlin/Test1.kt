@@ -22,10 +22,10 @@ internal class Test1 {
 
     @Test
     fun testInputFromParameters() {
-        val a = listOf("a", "b", "c")
-        val b = listOf("a", "d", "c", "e")
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
+        val a = listOf("a", "b", "c").map { Line(it) }
+        val b = listOf("a", "d", "c", "e").map { Line(it) }
+        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
+        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
         assertEquals(processInput(arrayOf("a.txt", "b.txt")), Pair(a, b))
         File("a.txt").delete()
         File("b.txt").delete()
@@ -33,10 +33,10 @@ internal class Test1 {
 
     @Test
     fun testInputFromConsole() {
-        val a = listOf("a", "b", "c")
-        val b = listOf("a", "d", "c", "e")
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line + "\n") }
+        val a = listOf("a", "b", "c").map { Line(it) }
+        val b = listOf("a", "d", "c", "e").map { Line(it) }
+        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
+        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
         System.setIn(ByteArrayInputStream("a.txt\nb.txt\n".toByteArray()))
         assertEquals(processInput(arrayOf()), Pair(a, b))
         File("a.txt").delete()
@@ -45,9 +45,15 @@ internal class Test1 {
 
     @Test
     fun testFindChanges() {
-        val a = listOf("a", "b", "c")
-        val b = listOf("a", "d", "c", "e")
-        val diff = listOf(Pair(0, "a"), Pair(-1, "b"), Pair(1, "d"), Pair(0, "c"), Pair(1, "e"))
+        val a = listOf("a", "b", "c").map { Line(it) }
+        val b = listOf("a", "d", "c", "e").map { Line(it) }
+        val diff = listOf(
+            Line("a", LineStatus.NotChanged),
+            Line("b", LineStatus.Deleted),
+            Line("d", LineStatus.Added),
+            Line("c", LineStatus.NotChanged),
+            Line("e", LineStatus.Added)
+        )
         assertEquals(findChanges(a, b), diff)
     }
 
@@ -55,7 +61,13 @@ internal class Test1 {
     fun testPrintDiff() {
         System.setOut(PrintStream(stream))
 
-        val diff = listOf(Pair(0, "a"), Pair(-1, "b"), Pair(1, "d"), Pair(0, "c"), Pair(1, "e"))
+        val diff = listOf(
+            Line("a", LineStatus.NotChanged),
+            Line("b", LineStatus.Deleted),
+            Line("d", LineStatus.Added),
+            Line("c", LineStatus.NotChanged),
+            Line("e", LineStatus.Added)
+        )
         printDifference(diff)
         assertEquals(stream.toString(), "a\n-b\n+d\nc\n+e\n")
 
