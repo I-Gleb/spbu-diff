@@ -103,7 +103,7 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
             ++currJ
         }
         // добавляем в файл-сравнение неизменную строку
-        comparisonFile.add(commonLine)
+        comparisonFile.add(Line(commonLine.s))
         ++currI
         ++currJ
     }
@@ -132,7 +132,7 @@ fun printDifference(comparisonFile : List<Line>) {
         LineStatus.Added to "+"
     )
     for (line in comparisonFile) {
-        print(linePrefix[line.status] + line.s + "\n")
+        println(linePrefix[line.status] + line.s)
     }
 }
 
