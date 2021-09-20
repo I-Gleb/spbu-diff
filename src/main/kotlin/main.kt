@@ -3,7 +3,15 @@ import java.lang.Integer.max
 import kotlin.system.exitProcess
 
 enum class LineStatus {
-    Added, Deleted, NotChanged
+    Added, Deleted, NotChanged;
+
+    override fun toString(): String {
+        return when(this) {
+            Added -> "+"
+            Deleted -> "-"
+            NotChanged -> ""
+        }
+    }
 }
 
 data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
@@ -16,9 +24,10 @@ data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
 fun processInput(args: Array<String>): Pair<List<Line>, List<Line> > {
     val pathFirst:String?
     val pathSecond:String?
+
     if (args.isNotEmpty()) {
-        pathFirst = args[0]
-        pathSecond = if (args.size > 1) args[1] else null
+        pathFirst = args.getOrNull(0)
+        pathSecond = args.getOrNull(1)
     }
     else {
         println("Enter path to the first file:")
@@ -126,13 +135,8 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
  * Выводит разницу между файлами по файлу-сравнению.
  */
 fun printDifference(comparisonFile : List<Line>) {
-    val linePrefix = mapOf(
-        LineStatus.Deleted to "-",
-        LineStatus.NotChanged to "",
-        LineStatus.Added to "+"
-    )
     for (line in comparisonFile) {
-        println(linePrefix[line.status] + line.s)
+        println(line.status.toString() + line.s)
     }
 }
 
