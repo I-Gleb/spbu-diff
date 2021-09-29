@@ -32,7 +32,7 @@ internal class Test1 {
     }
 
     @Test
-    fun testInputFromParameters() {
+    fun testInputFromParameters1() {
         assertEquals(
             processInput(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt")),
             InputData(
@@ -45,8 +45,47 @@ internal class Test1 {
     }
 
     @Test
+    fun testInputFromParameters2() {
+        assertEquals(
+            processInput(arrayOf("--color", "test-cases/1/a.txt", "test-cases/1/b.txt")),
+            InputData(
+                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                OutputFormat.FULL,
+                true
+            )
+        )
+    }
+
+    @Test
+    fun testInputFromParameters3() {
+        assertEquals(
+            processInput(arrayOf("--full", "--color", "test-cases/1/a.txt", "test-cases/1/b.txt")),
+            InputData(
+                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                OutputFormat.FULL,
+                true
+            )
+        )
+    }
+
+    @Test
+    fun testInputFromParameters4() {
+        assertEquals(
+            processInput(arrayOf("--color", "--short", "test-cases/1/a.txt", "test-cases/1/b.txt")),
+            InputData(
+                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                OutputFormat.SHORT,
+                true
+            )
+        )
+    }
+
+    @Test
     fun testInputFromConsole() {
-        System.setIn(ByteArrayInputStream("test-cases/1/a.txt\ntest-cases/1/b.txt\n".toByteArray()))
+        System.setIn(ByteArrayInputStream("test-cases/1/a.txt\ntest-cases/1/b.txt\nfull\nn\n".toByteArray()))
 
         assertEquals(
             processInput(arrayOf()),

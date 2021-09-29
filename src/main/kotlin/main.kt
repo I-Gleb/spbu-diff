@@ -1,3 +1,10 @@
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.switch
+import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 import java.lang.Integer.max
 import kotlin.system.exitProcess
@@ -18,40 +25,94 @@ enum class OutputFormat { FULL, SHORT }
 
 data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
 
-data class InputData(val fileFirst: List<Line>, val fileSecond: List<Line>, val formatOut: OutputFormat, val is_colored: Boolean)
+data class InputData(val fileFirst: List<Line>, val fileSecond: List<Line>, val formatOut: OutputFormat, val isColored: Boolean)
+
+class ArgsParser : CliktCommand() {
+    val formatOut by option(help = "output format").switch(
+        "--full" to OutputFormat.FULL,
+        "--short" to OutputFormat.SHORT
+    ).default(OutputFormat.FULL)
+    val isColored by option("-c", "--color", help = "colored output").flag()
+    val fileFirst by argument(help = "path to the first file").file(mustExist = true, canBeDir = false, mustBeReadable = true)
+    val fileSecond by argument(help = "path to the second file").file(mustExist = true, canBeDir = false, mustBeReadable = true)
+    override fun run() = Unit
+}
 
 /*
  * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
  * Производится считываение и обработка входных даныых.
- * Функция возращает два сравниваемых файла и информацию о формате выходных данных. Если ввод некорректен, то программа завершается с кодом 1 и сообщением пользователю
+ * Функция возращает два сравниваемых файла и информацию о формате выходных данных.
+ * Если ввод некорректен, то программа завершается с кодом 1 и сообщением пользователю.
  */
 fun processInput(args: Array<String>): InputData {
-    val pathFirst:String?
-    val pathSecond:String?
-
-    if (args.isNotEmpty()) {
-        pathFirst = args.getOrNull(0)
-        pathSecond = args.getOrNull(1)
+    if (args.isEmpty()) {
+        return interactWithUser()
     }
-    else {
-        println("Enter path to the first file:")
-        pathFirst = readLine()
-        println("Enter path to the second file:")
-        pathSecond = readLine()
-    }
+    val parser = ArgsParser()
+    parser.main(args)
+    return InputData(
+        parser.fileFirst.bufferedReader().readLines().map { Line(it) },
+        parser.fileSecond.bufferedReader().readLines().map { Line(it) },
+        parser.formatOut,
+        parser.isColored
+    )
+}
 
-    val fileFirst = if (pathFirst != null) File(pathFirst) else null
-    val fileSecond = if (pathSecond != null) File(pathSecond) else null
-    if (!(fileFirst?.isFile == true && fileSecond?.isFile == true)) {
-        println("Incorrect paths to files")
+/*
+ * В общении с пользователем получает и обрабатывает входные данные.
+ * Возращает файлы, которые будут сравниваться, и формат выходных данных.
+ */
+fun interactWithUser(): InputData {
+    println("Enter path to the first file:")
+    val fileFirst = getFileOrNull(readLine())
+    if (fileFirst == null) {
+        println("Incorrect path to file")
         exitProcess(1)
     }
+
+    println("Enter path to the second file:")
+    val fileSecond = getFileOrNull(readLine())
+    if (fileSecond == null) {
+        println("Incorrect path to file")
+        exitProcess(1)
+    }
+
+    println("Full or short format? (full/short)")
+    val formatOut = when (readLine()) {
+        "full" -> OutputFormat.FULL
+        "short" -> OutputFormat.SHORT
+        else -> {
+            println("Incorrect format: \"full\"/\"short\" expected")
+            exitProcess(1)
+        }
+    }
+
+    println("Make colorful lines? (y/n)")
+    val isColored = when (readLine()) {
+        "y" -> true
+        "n" -> false
+        else -> {
+            println("Incorrect input: \"y\"/\"n\" expected")
+            exitProcess(1)
+        }
+    }
+
     return InputData(
         fileFirst.bufferedReader().readLines().map { Line(it) },
         fileSecond.bufferedReader().readLines().map { Line(it) },
-        OutputFormat.FULL,
-        false
+        formatOut,
+        isColored
     )
+}
+
+/*
+ * Принимает на вход зануляемую строку.
+ * Если строка является корректным путём до файла, то возращает его. Иначе - null.
+ */
+fun getFileOrNull(path: String?): File? {
+    val file = if (path != null) File(path) else null
+    if (file?.isFile == true) return file
+    return null
 }
 
 /*
@@ -139,10 +200,10 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
  * Принимает файл-сравнение comparisonFile.
  * Выводит разницу между файлами по файлу-сравнению в формате, зависящим от formatOut и is_colored.
  */
-fun printDifference(comparisonFile : List<Line>, formatOut: OutputFormat, is_colored: Boolean) {
+fun printDifference(comparisonFile : List<Line>, formatOut: OutputFormat, isColored: Boolean) {
     if (formatOut == OutputFormat.FULL) {
         for (line in comparisonFile) {
-            printLine(line, is_colored)
+            printLine(line, isColored)
         }
     }
     else {
@@ -155,7 +216,7 @@ fun printDifference(comparisonFile : List<Line>, formatOut: OutputFormat, is_col
  * Печатает строку заданным цветом.
  */
 fun printColored(s: String, color: TextColor) {
-    println(color.prefix + s + TextColor.DEFAULT)
+    println(color.prefix + s + TextColor.DEFAULT.prefix)
 }
 
 /*
@@ -163,8 +224,8 @@ fun printColored(s: String, color: TextColor) {
  * Печатает строку или цветную строку в зависимости от переданного Boolean-значения.
  * Цвет и добавляемый перед строкой префикс зависят от line.status.
  */
-fun printLine(line: Line, is_colored: Boolean) {
-    if (is_colored) {
+fun printLine(line: Line, isColored: Boolean) {
+    if (isColored) {
         printColored(line.status.prefix + line.s, line.status.color)
     }
     else {
@@ -177,5 +238,5 @@ fun main(args: Array<String>) {
 
     val comparisonFile = findChanges(input.fileFirst, input.fileSecond)
 
-    printDifference(comparisonFile, input.formatOut, input.is_colored)
+    printDifference(comparisonFile, input.formatOut, input.isColored)
 }
