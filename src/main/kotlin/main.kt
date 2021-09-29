@@ -2,16 +2,16 @@ import java.io.File
 import java.lang.Integer.max
 import kotlin.system.exitProcess
 
-enum class LineStatus {
-    Added, Deleted, NotChanged;
+enum class TextColor(val prefix: String) {
+    DEFAULT("\u001B[0m"),
+    RED("\u001B[31m"),
+    GREEN("\u001B[32m")
+}
 
-    override fun toString(): String {
-        return when(this) {
-            Added -> "+"
-            Deleted -> "-"
-            NotChanged -> ""
-        }
-    }
+enum class LineStatus(val prefix: String, val color: TextColor) {
+    Added("+", TextColor.GREEN),
+    Deleted("-", TextColor.RED),
+    NotChanged("", TextColor.DEFAULT)
 }
 
 data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
@@ -136,8 +136,33 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
  */
 fun printDifference(comparisonFile : List<Line>) {
     for (line in comparisonFile) {
-        println(line.status.toString() + line.s)
+        printLine(line, false)
     }
+}
+
+/*
+ * Принимает цвет.
+ * Печатает строку, которая не отображается в консоли, но меняет цвет текста, выводимого после, на переданный.
+ */
+fun setColor(color: TextColor) {
+    print(color.prefix)
+}
+
+
+/*
+ * Принимает строку и значение типа Boolean.
+ * Печатает строку или цветную строку в зависимости от переданного Boolean-значения.
+ * Цвет и добавляемый перед строкой префикс зависят от line.status.
+ */
+fun printLine(line: Line, is_colored: Boolean) {
+    if (is_colored) {
+        setColor(line.status.color)
+    }
+    print(line.status.prefix + line.s)
+    if (is_colored) {
+        setColor(TextColor.DEFAULT)
+    }
+    println()
 }
 
 fun main(args: Array<String>) {
