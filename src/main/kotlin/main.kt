@@ -14,14 +14,18 @@ enum class LineStatus(val prefix: String, val color: TextColor) {
     NotChanged("", TextColor.DEFAULT)
 }
 
+enum class OutputFormat { FULL, SHORT }
+
 data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
+
+data class InputData(val fileFirst: List<Line>, val fileSecond: List<Line>, val formatOut: OutputFormat, val is_colored: Boolean)
 
 /*
  * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
  * Производится считываение и обработка входных даныых.
  * Функция возращает два сравниваемых файла. Если ввод некорректен, то программа завершается с кодом 1 и сообщением пользователю
  */
-fun processInput(args: Array<String>): Pair<List<Line>, List<Line> > {
+fun processInput(args: Array<String>): InputData {
     val pathFirst:String?
     val pathSecond:String?
 
@@ -38,14 +42,16 @@ fun processInput(args: Array<String>): Pair<List<Line>, List<Line> > {
 
     val fileFirst = if (pathFirst != null) File(pathFirst) else null
     val fileSecond = if (pathSecond != null) File(pathSecond) else null
-    if (fileFirst?.isFile == true && fileSecond?.isFile == true) {
-        return Pair(fileFirst.bufferedReader().readLines().map {Line(it)},
-            fileSecond.bufferedReader().readLines().map {Line(it)})
-    }
-    else {
+    if (!(fileFirst?.isFile == true && fileSecond?.isFile == true)) {
         println("Incorrect paths to files")
         exitProcess(1)
     }
+    return InputData(
+        fileFirst.bufferedReader().readLines().map { Line(it) },
+        fileSecond.bufferedReader().readLines().map { Line(it) },
+        OutputFormat.FULL,
+        false
+    )
 }
 
 /*
@@ -129,7 +135,6 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
     return comparisonFile.toList()
 }
 
-
 /*
  * Принимает файл-сравнение.
  * Выводит разницу между файлами по файлу-сравнению.
@@ -147,7 +152,6 @@ fun printDifference(comparisonFile : List<Line>) {
 fun setColor(color: TextColor) {
     print(color.prefix)
 }
-
 
 /*
  * Принимает строку и значение типа Boolean.

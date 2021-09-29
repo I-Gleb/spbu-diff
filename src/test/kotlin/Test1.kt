@@ -33,17 +33,30 @@ internal class Test1 {
 
     @Test
     fun testInputFromParameters() {
-        assertEquals(processInput(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt")),
-            Pair(File("test-cases/1/a.txt").readText().lines().map { Line(it) },
-            File("test-cases/1/b.txt").readText().lines().map { Line(it) }))
+        assertEquals(
+            processInput(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt")),
+            InputData(
+                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                OutputFormat.FULL,
+                false
+            )
+        )
     }
 
     @Test
     fun testInputFromConsole() {
         System.setIn(ByteArrayInputStream("test-cases/1/a.txt\ntest-cases/1/b.txt\n".toByteArray()))
 
-        assertEquals(processInput(arrayOf()), Pair(File("test-cases/1/a.txt").readText().lines().map { it -> Line(it) },
-            File("test-cases/1/b.txt").readText().lines().map { it -> Line(it) }))
+        assertEquals(
+            processInput(arrayOf()),
+            InputData(
+                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                OutputFormat.FULL,
+                false
+            )
+        )
     }
 
     @Test
@@ -102,7 +115,8 @@ internal class Test1 {
     }
 
     @Test
-    fun testMainBig() {
+    fun testMain4() {
+        // big test
         // a and b have 3000 elements each
         // diff has 4000 lines
         main(arrayOf("test-cases/4/a.txt", "test-cases/4/b.txt"))
