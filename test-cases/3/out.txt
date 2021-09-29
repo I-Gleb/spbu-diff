@@ -1,0 +1,7 @@
+-be
++say
+or
+not
+to
+-be
++say

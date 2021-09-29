@@ -33,31 +33,17 @@ internal class Test1 {
 
     @Test
     fun testInputFromParameters() {
-        val a = listOf("a", "b", "c").map { Line(it) }
-        val b = listOf("a", "d", "c", "e").map { Line(it) }
-
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
-
-        assertEquals(processInput(arrayOf("a.txt", "b.txt")), Pair(a, b))
-
-        File("a.txt").delete()
-        File("b.txt").delete()
+        assertEquals(processInput(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt")),
+            Pair(File("test-cases/1/a.txt").readText().lines().map { Line(it) },
+            File("test-cases/1/b.txt").readText().lines().map { Line(it) }))
     }
 
     @Test
     fun testInputFromConsole() {
-        val a = listOf("a", "b", "c").map { Line(it) }
-        val b = listOf("a", "d", "c", "e").map { Line(it) }
+        System.setIn(ByteArrayInputStream("test-cases/1/a.txt\ntest-cases/1/b.txt\n".toByteArray()))
 
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
-        System.setIn(ByteArrayInputStream("a.txt\nb.txt\n".toByteArray()))
-
-        assertEquals(processInput(arrayOf()), Pair(a, b))
-
-        File("a.txt").delete()
-        File("b.txt").delete()
+        assertEquals(processInput(arrayOf()), Pair(File("test-cases/1/a.txt").readText().lines().map { it -> Line(it) },
+            File("test-cases/1/b.txt").readText().lines().map { it -> Line(it) }))
     }
 
     @Test
@@ -93,101 +79,35 @@ internal class Test1 {
 
     @Test
     fun testMain1() {
-        val a = listOf("a", "b", "c").map { Line(it) }
-        val b = listOf("a", "d", "c", "e").map { Line(it) }
-        val diff = """
-            a
-            -b
-            +d
-            c
-            +e
-        """.trimIndent()
+        main(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt"))
 
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
-
-        main(arrayOf("a.txt", "b.txt"))
-
-        assertEquals(stream.toString().trim().lines().joinToString("\n"), diff)
-
-        File("a.txt").delete()
-        File("b.txt").delete()
+        assertEquals(stream.toString().trim().lines().joinToString("\n"),
+            File("test-cases/1/out.txt").readText().trim().lines().joinToString("\n"))
     }
 
     @Test
     fun testMain2() {
-        val a = listOf("").map { Line(it) }
-        val b = listOf("a", "b").map { Line(it) }
-        val diff = """
-            -
-            +a
-            +b
-        """.trimIndent()
+        main(arrayOf("test-cases/2/a.txt", "test-cases/2/b.txt"))
 
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
-
-        main(arrayOf("a.txt", "b.txt"))
-
-        assertEquals(stream.toString().trim().lines().joinToString("\n"), diff)
-
-        File("a.txt").delete()
-        File("b.txt").delete()
+        assertEquals(stream.toString().trim().lines().joinToString("\n"),
+            File("test-cases/2/out.txt").readText().trim().lines().joinToString("\n"))
     }
 
     @Test
     fun testMain3() {
-        val a = listOf("be", "or", "not", "to", "be").map { Line(it) }
-        val b = listOf("say", "or", "not", "to", "say").map { Line(it) }
-        val diff = """
-            -be
-            +say
-            or
-            not
-            to
-            -be
-            +say
-        """.trimIndent()
+        main(arrayOf("test-cases/3/a.txt", "test-cases/3/b.txt"))
 
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
-
-        main(arrayOf("a.txt", "b.txt"))
-
-        assertEquals(stream.toString().trim().lines().joinToString("\n"), diff)
-
-        File("a.txt").delete()
-        File("b.txt").delete()
+        assertEquals(stream.toString().trim().lines().joinToString("\n"),
+            File("test-cases/3/out.txt").readText().trim().lines().joinToString("\n"))
     }
 
     @Test
     fun testMainBig() {
-        val a = mutableListOf<Line>()
-        val b = mutableListOf<Line>()
-        val diffBuilder = StringBuilder()
-
-        for (i in 1..1000) {
-            a.add(Line("1"))
-            a.add(Line("2"))
-            a.add(Line("3"))
-
-            b.add(Line("1"))
-            b.add(Line("4"))
-            b.add(Line("3"))
-
-            diffBuilder.append("1\n-2\n+4\n3\n")
-        }
         // a and b have 3000 elements each
         // diff has 4000 lines
+        main(arrayOf("test-cases/4/a.txt", "test-cases/4/b.txt"))
 
-        File("a.txt").bufferedWriter().use { out -> for (line in a) out.write(line.s + "\n") }
-        File("b.txt").bufferedWriter().use { out -> for (line in b) out.write(line.s + "\n") }
-
-        main(arrayOf("a.txt", "b.txt"))
-
-        assertEquals(stream.toString().trim().lines().joinToString("\n"), diffBuilder.toString().trim())
-
-        File("a.txt").delete()
-        File("b.txt").delete()
+        assertEquals(stream.toString().trim().lines().joinToString("\n"),
+            File("test-cases/4/out.txt").readText().trim().lines().joinToString("\n"))
     }
 }
