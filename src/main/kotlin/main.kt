@@ -23,7 +23,7 @@ data class InputData(val fileFirst: List<Line>, val fileSecond: List<Line>, val 
 /*
  * Принимает параметры командной строки. При необходимости запрашивает данные у пользователя.
  * Производится считываение и обработка входных даныых.
- * Функция возращает два сравниваемых файла. Если ввод некорректен, то программа завершается с кодом 1 и сообщением пользователю
+ * Функция возращает два сравниваемых файла и информацию о формате выходных данных. Если ввод некорректен, то программа завершается с кодом 1 и сообщением пользователю
  */
 fun processInput(args: Array<String>): InputData {
     val pathFirst:String?
@@ -136,18 +136,23 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
 }
 
 /*
- * Принимает файл-сравнение.
- * Выводит разницу между файлами по файлу-сравнению.
+ * Принимает файл-сравнение comparisonFile.
+ * Выводит разницу между файлами по файлу-сравнению в формате, зависящим от formatOut и is_colored.
  */
-fun printDifference(comparisonFile : List<Line>) {
-    for (line in comparisonFile) {
-        printLine(line, false)
+fun printDifference(comparisonFile : List<Line>, formatOut: OutputFormat, is_colored: Boolean) {
+    if (formatOut == OutputFormat.FULL) {
+        for (line in comparisonFile) {
+            printLine(line, is_colored)
+        }
+    }
+    else {
+        TODO()
     }
 }
 
 /*
  * Принимает цвет.
- * Печатает строку, которая не отображается в консоли, но меняет цвет текста, выводимого после, на переданный.
+ * Меняет цвет текста, выводимого после, на переданный.
  */
 fun setColor(color: TextColor) {
     print(color.prefix)
@@ -161,18 +166,19 @@ fun setColor(color: TextColor) {
 fun printLine(line: Line, is_colored: Boolean) {
     if (is_colored) {
         setColor(line.status.color)
-    }
-    print(line.status.prefix + line.s)
-    if (is_colored) {
+        print(line.status.prefix + line.s)
         setColor(TextColor.DEFAULT)
+        println()
     }
-    println()
+    else {
+        println(line.status.prefix + line.s)
+    }
 }
 
 fun main(args: Array<String>) {
-    val (originalFile, updatedFile) = processInput(args)
+    val input = processInput(args)
 
-    val comparisonFile = findChanges(originalFile, updatedFile)
+    val comparisonFile = findChanges(input.fileFirst, input.fileSecond)
 
-    printDifference(comparisonFile)
+    printDifference(comparisonFile, input.formatOut, input.is_colored)
 }

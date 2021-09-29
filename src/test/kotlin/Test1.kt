@@ -84,7 +84,7 @@ internal class Test1 {
             Line("e", LineStatus.Added)
         )
 
-        printDifference(diff)
+        printDifference(diff, OutputFormat.FULL, false)
 
         assertEquals(stream.toString().trim().lines().joinToString("\n"),
             "a\n-b\n+d\nc\n+e")
