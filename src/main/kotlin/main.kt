@@ -151,11 +151,11 @@ fun printDifference(comparisonFile : List<Line>, formatOut: OutputFormat, is_col
 }
 
 /*
- * Принимает цвет.
- * Меняет цвет текста, выводимого после, на переданный.
+ * Принимает строку и цвет.
+ * Печатает строку заданным цветом.
  */
-fun setColor(color: TextColor) {
-    print(color.prefix)
+fun printColored(s: String, color: TextColor) {
+    println(color.prefix + s + TextColor.DEFAULT)
 }
 
 /*
@@ -165,10 +165,7 @@ fun setColor(color: TextColor) {
  */
 fun printLine(line: Line, is_colored: Boolean) {
     if (is_colored) {
-        setColor(line.status.color)
-        print(line.status.prefix + line.s)
-        setColor(TextColor.DEFAULT)
-        println()
+        printColored(line.status.prefix + line.s, line.status.color)
     }
     else {
         println(line.status.prefix + line.s)
