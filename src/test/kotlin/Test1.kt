@@ -36,8 +36,8 @@ internal class Test1 {
         assertEquals(
             processInput(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt")),
             InputData(
-                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
-                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/a.txt"),
+                File("test-cases/1/b.txt"),
                 OutputFormat.FULL,
                 false
             )
@@ -49,8 +49,8 @@ internal class Test1 {
         assertEquals(
             processInput(arrayOf("--color", "test-cases/1/a.txt", "test-cases/1/b.txt")),
             InputData(
-                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
-                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/a.txt"),
+                File("test-cases/1/b.txt"),
                 OutputFormat.FULL,
                 true
             )
@@ -60,10 +60,10 @@ internal class Test1 {
     @Test
     fun testInputFromParameters3() {
         assertEquals(
-            processInput(arrayOf("--full", "--color", "test-cases/1/a.txt", "test-cases/1/b.txt")),
+            processInput(arrayOf("-fc", "test-cases/1/a.txt", "test-cases/1/b.txt")),
             InputData(
-                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
-                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/a.txt"),
+                File("test-cases/1/b.txt"),
                 OutputFormat.FULL,
                 true
             )
@@ -73,11 +73,11 @@ internal class Test1 {
     @Test
     fun testInputFromParameters4() {
         assertEquals(
-            processInput(arrayOf("--color", "--short", "test-cases/1/a.txt", "test-cases/1/b.txt")),
+            processInput(arrayOf("--color", "--unified", "test-cases/1/a.txt", "test-cases/1/b.txt")),
             InputData(
-                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
-                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
-                OutputFormat.SHORT,
+                File("test-cases/1/a.txt"),
+                File("test-cases/1/b.txt"),
+                OutputFormat.UNIFIED,
                 true
             )
         )
@@ -90,8 +90,8 @@ internal class Test1 {
         assertEquals(
             processInput(arrayOf()),
             InputData(
-                File("test-cases/1/a.txt").readText().lines().map { Line(it) },
-                File("test-cases/1/b.txt").readText().lines().map { Line(it) },
+                File("test-cases/1/a.txt"),
+                File("test-cases/1/b.txt"),
                 OutputFormat.FULL,
                 false
             )
@@ -123,34 +123,34 @@ internal class Test1 {
             Line("e", LineStatus.Added)
         )
 
-        printDifference(diff, OutputFormat.FULL, false)
+        printDifference(InputData(File("test-cases/1/a.txt"), File("test-cases/1/b.txt"), OutputFormat.FULL, false), diff)
 
-        assertEquals(stream.toString().trim().lines().joinToString("\n"),
-            "a\n-b\n+d\nc\n+e")
+        assertEquals(stream.toString().trim().lines().drop(2).joinToString("\n"),
+            File("test-cases/1/out.txt").readText().trim().lines().drop(2).joinToString("\n"))
     }
 
     @Test
     fun testMain1() {
         main(arrayOf("test-cases/1/a.txt", "test-cases/1/b.txt"))
 
-        assertEquals(stream.toString().trim().lines().joinToString("\n"),
-            File("test-cases/1/out.txt").readText().trim().lines().joinToString("\n"))
+        assertEquals(stream.toString().trim().lines().drop(2).joinToString("\n"),
+            File("test-cases/1/out.txt").readText().trim().lines().drop(2).joinToString("\n"))
     }
 
     @Test
     fun testMain2() {
         main(arrayOf("test-cases/2/a.txt", "test-cases/2/b.txt"))
 
-        assertEquals(stream.toString().trim().lines().joinToString("\n"),
-            File("test-cases/2/out.txt").readText().trim().lines().joinToString("\n"))
+        assertEquals(stream.toString().trim().lines().drop(2).joinToString("\n"),
+            File("test-cases/2/out.txt").readText().trim().lines().drop(2).joinToString("\n"))
     }
 
     @Test
     fun testMain3() {
         main(arrayOf("test-cases/3/a.txt", "test-cases/3/b.txt"))
 
-        assertEquals(stream.toString().trim().lines().joinToString("\n"),
-            File("test-cases/3/out.txt").readText().trim().lines().joinToString("\n"))
+        assertEquals(stream.toString().trim().lines().drop(2).joinToString("\n"),
+            File("test-cases/3/out.txt").readText().trim().lines().drop(2).joinToString("\n"))
     }
 
     @Test
@@ -160,7 +160,16 @@ internal class Test1 {
         // diff has 4000 lines
         main(arrayOf("test-cases/4/a.txt", "test-cases/4/b.txt"))
 
-        assertEquals(stream.toString().trim().lines().joinToString("\n"),
-            File("test-cases/4/out.txt").readText().trim().lines().joinToString("\n"))
+        assertEquals(stream.toString().trim().lines().drop(2).joinToString("\n"),
+            File("test-cases/4/out.txt").readText().trim().lines().drop(2).joinToString("\n"))
+    }
+
+    @Test
+    fun testMain5() {
+        // unified format
+        main(arrayOf("-u", "test-cases/5/a.txt", "test-cases/5/b.txt"))
+
+        assertEquals(stream.toString().trim().lines().drop(2).joinToString("\n"),
+            File("test-cases/5/out.txt").readText().trim().lines().drop(2).joinToString("\n"))
     }
 }

@@ -7,6 +7,8 @@ import com.github.ajalt.clikt.parameters.options.switch
 import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 import java.lang.Integer.max
+import java.lang.Integer.min
+import java.util.*
 import kotlin.system.exitProcess
 
 enum class TextColor(val prefix: String) {
@@ -21,16 +23,18 @@ enum class LineStatus(val prefix: String, val color: TextColor) {
     NotChanged("", TextColor.DEFAULT)
 }
 
-enum class OutputFormat { FULL, SHORT }
+enum class OutputFormat { FULL, UNIFIED }
 
 data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
 
-data class InputData(val fileFirst: List<Line>, val fileSecond: List<Line>, val formatOut: OutputFormat, val isColored: Boolean)
+data class InputData(val fileFirst: File, val fileSecond: File, val formatOut: OutputFormat, val isColored: Boolean)
 
 class ArgsParser : CliktCommand() {
     val formatOut by option(help = "output format").switch(
         "--full" to OutputFormat.FULL,
-        "--short" to OutputFormat.SHORT
+        "-f" to OutputFormat.FULL,
+        "--unified" to OutputFormat.UNIFIED,
+        "-u" to OutputFormat.UNIFIED
     ).default(OutputFormat.FULL)
     val isColored by option("-c", "--color", help = "colored output").flag()
     val fileFirst by argument(help = "path to the first file").file(mustExist = true, canBeDir = false, mustBeReadable = true)
@@ -50,12 +54,7 @@ fun processInput(args: Array<String>): InputData {
     }
     val parser = ArgsParser()
     parser.main(args)
-    return InputData(
-        parser.fileFirst.bufferedReader().readLines().map { Line(it) },
-        parser.fileSecond.bufferedReader().readLines().map { Line(it) },
-        parser.formatOut,
-        parser.isColored
-    )
+    return InputData(parser.fileFirst, parser.fileSecond, parser.formatOut, parser.isColored)
 }
 
 /*
@@ -63,6 +62,17 @@ fun processInput(args: Array<String>): InputData {
  * Возращает файлы, которые будут сравниваться, и формат выходных данных.
  */
 fun interactWithUser(): InputData {
+
+    /*
+     * Принимает на вход зануляемую строку.
+     * Если строка является корректным путём до файла, то возращает его. Иначе - null.
+     */
+    fun getFileOrNull(path: String?): File? {
+        val file = if (path != null) File(path) else null
+        if (file?.isFile == true) return file
+        return null
+    }
+
     println("Enter path to the first file:")
     val fileFirst = getFileOrNull(readLine())
     if (fileFirst == null) {
@@ -77,12 +87,12 @@ fun interactWithUser(): InputData {
         exitProcess(1)
     }
 
-    println("Full or short format? (full/short)")
+    println("Full or unified format? (full/unified)")
     val formatOut = when (readLine()) {
         "full" -> OutputFormat.FULL
-        "short" -> OutputFormat.SHORT
+        "unified" -> OutputFormat.UNIFIED
         else -> {
-            println("Incorrect format: \"full\"/\"short\" expected")
+            println("Incorrect format: \"full\"/\"unified\" expected")
             exitProcess(1)
         }
     }
@@ -97,22 +107,7 @@ fun interactWithUser(): InputData {
         }
     }
 
-    return InputData(
-        fileFirst.bufferedReader().readLines().map { Line(it) },
-        fileSecond.bufferedReader().readLines().map { Line(it) },
-        formatOut,
-        isColored
-    )
-}
-
-/*
- * Принимает на вход зануляемую строку.
- * Если строка является корректным путём до файла, то возращает его. Иначе - null.
- */
-fun getFileOrNull(path: String?): File? {
-    val file = if (path != null) File(path) else null
-    if (file?.isFile == true) return file
-    return null
+    return InputData(fileFirst, fileSecond, formatOut, isColored)
 }
 
 /*
@@ -198,45 +193,118 @@ fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line>
 
 /*
  * Принимает файл-сравнение comparisonFile.
- * Выводит разницу между файлами по файлу-сравнению в формате, зависящим от formatOut и is_colored.
+ * Выводит разницу между файлами по файлу-сравнению в формате, зависящем от input.formatOut и input.is_colored.
  */
-fun printDifference(comparisonFile : List<Line>, formatOut: OutputFormat, isColored: Boolean) {
-    if (formatOut == OutputFormat.FULL) {
-        for (line in comparisonFile) {
-            printLine(line, isColored)
+fun printDifference(input: InputData, comparisonFile : List<Line>) {
+
+    /*
+     * Возращает индекс первой изменнённой строки начиная с индекса ind.
+     * Если после индекса ind нет изменнённых строк вернёт ind - 1.
+     */
+    fun nextChanged(ind: Int): Int {
+         return comparisonFile.drop(ind).indexOfFirst { it.status != LineStatus.NotChanged } + ind
+    }
+
+    /*
+     * Получает 2 файла.
+     * Печатает заголовок diff с именами файлов и временами последного изменения
+     */
+    fun printHeader(fileFirst: File, fileSecond: File) {
+        println("--- ${fileFirst.name} ${Date(fileFirst.lastModified())}")
+        println("+++ ${fileSecond.name} ${Date(fileSecond.lastModified())}")
+    }
+
+    /*
+     * Принимает строку и цвет.
+     * Печатает строку заданным цветом.
+     */
+    fun printColored(s: String, color: TextColor) {
+        println(color.prefix + s + TextColor.DEFAULT.prefix)
+    }
+
+    /*
+     * Принимает строку и значение типа Boolean.
+     * Печатает строку или цветную строку в зависимости от переданного Boolean-значения.
+     * Цвет и добавляемый перед строкой префикс зависят от line.status.
+     */
+    fun printLine(line: Line, isColored: Boolean) {
+        if (isColored) {
+            printColored(line.status.prefix + line.s, line.status.color)
+        }
+        else {
+            println(line.status.prefix + line.s)
         }
     }
-    else {
-        TODO()
-    }
-}
 
-/*
- * Принимает строку и цвет.
- * Печатает строку заданным цветом.
- */
-fun printColored(s: String, color: TextColor) {
-    println(color.prefix + s + TextColor.DEFAULT.prefix)
-}
+    /*
+     * Печатает сравнения в unified-формате.
+     */
+    fun printUnified() {
+        val contextSize = 3 // размер контеста, количество неизменных строк, которые выводятся до и после блока изменений
+        var lineNum1 = 1 // номер строки в исходном файле
+        var lineNum2 = 1 // номер строки в новом файле
+        var startOfBlock = 0 // индекс на начало блока изменений
 
-/*
- * Принимает строку и значение типа Boolean.
- * Печатает строку или цветную строку в зависимости от переданного Boolean-значения.
- * Цвет и добавляемый перед строкой префикс зависят от line.status.
- */
-fun printLine(line: Line, isColored: Boolean) {
-    if (isColored) {
-        printColored(line.status.prefix + line.s, line.status.color)
+        while (startOfBlock < comparisonFile.size) {
+            // неизменнённую строку нужно пропустить
+            if (comparisonFile[startOfBlock].status == LineStatus.NotChanged) {
+                startOfBlock++
+                lineNum1++
+                lineNum2++
+                continue
+            }
+
+            var cntAdded = 0 // количество добавленных строк в блоке
+            var cntDeleted = 0 // количество удалённых строк в блоке
+            var endOfBlock = startOfBlock // индекс на конец блока измений
+
+            // добавляем в блок строки, пока не будет 2 * contextSize неизменнённых строк подряд
+            while (endOfBlock <= nextChanged(endOfBlock) && nextChanged(endOfBlock) < endOfBlock + 2 * contextSize) {
+                when (comparisonFile[endOfBlock].status) {
+                    LineStatus.Added -> ++cntAdded
+                    LineStatus.Deleted -> ++cntDeleted
+                }
+                ++endOfBlock
+            }
+
+            val st = max(0, startOfBlock - contextSize) // индекс на начало выводимого блока
+            val end = min(endOfBlock + contextSize, comparisonFile.size) // индекс на конец выводимого блока
+
+            // вывод блока
+            println("@@ -${lineNum1 - (startOfBlock - st)},${end - st - cntAdded} +${lineNum2 - (startOfBlock - st)},${end - st - cntDeleted} @@")
+            for (ind in st until end) printLine(comparisonFile[ind], input.isColored)
+
+            lineNum1 += endOfBlock - startOfBlock - cntAdded
+            lineNum2 += endOfBlock - startOfBlock - cntDeleted
+            startOfBlock = endOfBlock
+        }
+    }
+
+    /*
+     * Печатает сравнение в полном формате.
+     */
+    fun printFull() {
+        for (line in comparisonFile) {
+            printLine(line, input.isColored)
+        }
+    }
+
+    printHeader(input.fileFirst, input.fileSecond)
+    if (input.formatOut == OutputFormat.FULL) {
+        printFull()
     }
     else {
-        println(line.status.prefix + line.s)
+        printUnified()
     }
 }
 
 fun main(args: Array<String>) {
     val input = processInput(args)
 
-    val comparisonFile = findChanges(input.fileFirst, input.fileSecond)
+    val comparisonFile = findChanges(
+        input.fileFirst.bufferedReader().readLines().map { Line(it) },
+        input.fileSecond.bufferedReader().readLines().map { Line(it) }
+    )
 
-    printDifference(comparisonFile, input.formatOut, input.isColored)
+    printDifference(input, comparisonFile)
 }
