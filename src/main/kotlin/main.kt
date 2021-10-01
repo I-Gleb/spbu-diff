@@ -42,7 +42,7 @@ data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged) {
 
 data class InputData(val fileFirst: File, val fileSecond: File, val formatOut: OutputFormat, val isColored: Boolean)
 
-class ArgsParser : CliktCommand() {
+class Diff : CliktCommand() {
     val formatOut by option(help = "output format").switch(
         "--full" to OutputFormat.FULL,
         "-f" to OutputFormat.FULL,
@@ -65,7 +65,7 @@ fun processInput(args: Array<String>): InputData {
     if (args.isEmpty()) {
         return interactWithUser()
     }
-    val parser = ArgsParser()
+    val parser = Diff()
     parser.main(args)
     return InputData(parser.fileFirst, parser.fileSecond, parser.formatOut, parser.isColored)
 }
