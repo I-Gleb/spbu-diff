@@ -25,7 +25,20 @@ enum class LineStatus(val prefix: String, val color: TextColor) {
 
 enum class OutputFormat { FULL, UNIFIED }
 
-data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged)
+data class Line(val s: String, val status: LineStatus = LineStatus.NotChanged) {
+
+    fun getHash(s: String): Long {
+        val p = 179
+        val mod = 1000000087
+        var res: Long = 0
+        for (elem in s) {
+            res = ((res * p) + elem.code) % mod
+        }
+        return res
+    }
+
+    val h = Pair(s.hashCode(), getHash(s))
+}
 
 data class InputData(val fileFirst: File, val fileSecond: File, val formatOut: OutputFormat, val isColored: Boolean)
 
@@ -157,24 +170,24 @@ fun <T> longestCommonSubseq(a : List<T>, b : List<T>): List<T> {
  * Функция возращает файл-сравнение, в котором у каждой строки есть пометка о её статусе.
  */
 fun findChanges(originalFile : List<Line>, updatedFile : List<Line>): List<Line> {
-    val lcs = longestCommonSubseq(originalFile, updatedFile)
+    val hashesOfLcs = longestCommonSubseq(originalFile.map { it.h }, updatedFile.map { it.h })
     val comparisonFile = mutableListOf<Line>()
     // будем идти двумя указателями, currI по originalFile, currJ по updatedFile
     var currI = 0
     var currJ = 0
-    for (commonLine in lcs) {
+    for (hashOfCommonLine in hashesOfLcs) {
         // добавляем в файл-сравенение удалённые строки
-        while (originalFile[currI] != commonLine) {
+        while (originalFile[currI].h != hashOfCommonLine) {
             comparisonFile.add(Line(originalFile[currI].s, LineStatus.Deleted))
             ++currI
         }
         // добавляем в файл-сравнение добаленные строки
-        while (updatedFile[currJ] != commonLine) {
+        while (updatedFile[currJ].h != hashOfCommonLine) {
             comparisonFile.add(Line(updatedFile[currJ].s, LineStatus.Added))
             ++currJ
         }
         // добавляем в файл-сравнение неизменную строку
-        comparisonFile.add(Line(commonLine.s))
+        comparisonFile.add(Line(originalFile[currI].s))
         ++currI
         ++currJ
     }
