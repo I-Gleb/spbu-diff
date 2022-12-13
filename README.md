@@ -1,72 +1,72 @@
-# Курс основ программирования на МКН СПбГУ
-## Проект 1: утилита diff
+# diff utility
+## Project made for programming basics course at Department of Mathematics and Computer Science, St. Petersburg State University
 
-[Постановка задачи](./TASK.md)
+[Task definition](./TASK.md)
 
-### Документация
+### Documentation
 
-Утилита diff (сокращение от difference) сравнивает два файла и определяет изменения, которые надо произвести с первым файлом, чтобы из него получить второй.
+The diff utility (short for difference) compares two text files and determines the changes that can be performed in order to get second file from the first one.
 
-#### Входные данные
+#### Input data
 
-Данная утилита работает в консольном режиме и поддерживает два вида ввода информации: через параметры запуска или через интерактивный режим.
+This utility works in console mode and supports two types of information input: through launch options or through interactive mode.
 
-##### Запуск с параметрами
+##### Run with parameters
 
-Интерфейс:
+Interface:
 
-    Usage: diff [OPTIONS] FILEFIRST FILESECOND
+     Usage: diff [OPTIONS] FILEFIRST FILESECOND
     
-    Options:
-    -f, -u, --full, --unified  output format
-    -c, --color                colored output
-    -h, --help                 Shows help message and exit
+     options:
+     -f, -u, --full, --unified output format
+     -c, --color colored output
+     -h, --help Show help message and exit
     
-    Arguments:
-    FILEFIRST   path to the first file
-    FILESECOND  path to the second file
+     Arguments:
+     FILEFIRST path to the first file
+     FILESECOND path to the second file
 
-Опции *-f* и *--full* соотвествуют формату Full, а *-u* и *--unified* - Unified.
-Если введено несколько опций *output format*, то приоритет имеет последняя.
-По умолчанию сравнение выводится в формате Full без цветных строк.
+The *-f* and *--full* options correspond to the Full format, while *-u* and *--unified* correspond to the Unified format.
+If multiple *output format* options are given, the last one takes precedence.
+By default, the comparison is displayed in Full format without color lines.
 
 
-Примеры использования:
+Examples of using:
 
-    $ diff -c a.txt b.txt
-    $ diff --color --unified a.txt b.txt
+     $ diff -c a.txt b.txt
+     $ diff --color --unified a.txt b.txt
 
-##### Интерактивный режим
+##### Interactive mode
 
-Интерфейс:
+Interface:
 
-Интерактивный режим активируется при запуске diff без параметров.
-Он последовательно запрашивает у пользователя пути до сравниваемых файлов,
-потом предлагает выбрать формат вывода (возможные значения: "full" и "unified")
-и цветность (возможные значения: "y" и "n").
+Interactive mode is activated when you run diff with no options.
+It sequentially asks the user for the paths to the compared files,
+then prompts you to select the output format (possible values: "full" and "unified")
+and chromaticity (possible values: "y" and "n").
 
-Пример использования:
+Usage example:
 
-    $ diff
-    Enter path to the first file:
-    a.txt
-    Enter path to the second file:
-    b.txt
-    Full or unified format? (full/unified)
-    unified
-    Make colorful lines? (y/n)
-    n
+     $ diff
+     Enter path to the first file:
+     a.txt
+     Enter path to second file:
+     b.txt
+     Full or unified format? (full/unified)
+     unified
+     Make colorful lines? (y/n)
+     n
 
-#### Вывод
+#### Conclusion
 
-Если входные данные некорректны, то выводится сообщение с указанием на ошибку и программа завершается к кодом возврата 1.
+If the input data is incorrect, an error message is displayed and the program ends with a return code of 1.
 
-При корректном вводе результат работы утилиты - текствый файл, который выводится в обычный поток вывода.
-В самом начале выходного файла находится заголовок с именами сравниваемых файлов и временами их последнего изменения.
-Далее есть два поддерживаемых формата:
-* Full - выводятся все удалённые, добавленные и неизменнёные строки. Перед добавленными выводится "+", а перед удалёнными - "-".
-* Unified - стандартный [unified формат для diff](https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html).
-Изменения выводятся блоками, а неизменённые части игнорируются. Перед и после каждого блока выводится "контекст" - 3 неизменные строки. 
-Также перед каждым блоком выводится информация о нём в стандартном Unified формате.
+With correct input, the result of the utility's operation is a text file that is output to the normal output stream.
+At the very beginning of the output file, there is a header with the names of the compared files and the times they were last modified.
+There are two supported formats below:
+* Full - all deleted, added and unchanged lines are displayed. "+" is displayed before the added ones, and "-" before the removed ones.
+* Unified - standard [unified format for diff](https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html).
+Changes are grouped in blocks, and unmodified parts are ignored. Before and after each block, the "context" is displayed - 3 unchanged lines.
+Also, before each block, information about it is displayed in a standard Unified format.
 
-Поддерживается цветной вывод, который печатает добавленные строки зелёным цветом, а удалённые - красным.
+Colored output is supported. It prints added lines in green and deleted lines in red.
