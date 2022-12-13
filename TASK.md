@@ -1,6 +1,6 @@
 # Task definition
 
-In this project, it is required to implement a simple analogue of the [diff utility] (https://ru.wikipedia.org/wiki/Diff), 
+In this project, it is required to implement a simple analogue of the [diff utility](https://wikipedia.org/wiki/Diff), 
 calculating the difference between two text files as a sequence of lines inserted and deleted,
 allowing to receive the second from the first file. It is not required to take into account changes within the lines.
 
