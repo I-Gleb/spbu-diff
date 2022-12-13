@@ -1,14 +1,12 @@
-# Постановка задачи
+# Task definition
 
-В этом проекте требуется реализовать простой аналог [утилиты diff](https://ru.wikipedia.org/wiki/Diff),
-вычисляющей разницу между двумя текстовыми файлами в виде последовательности вставляемых и удаляемых строк,
-позволяющей получить из первого файла второй. Учитывать изменения внутри строк не требуется.
+In this project, it is required to implement a simple analogue of the [diff utility] (https://ru.wikipedia.org/wiki/Diff), 
+calculating the difference between two text files as a sequence of lines inserted and deleted,
+allowing to receive the second from the first file. It is not required to take into account changes within the lines.
 
-Решение может основываться на алгоритме [поиска наибольшей общей подпоследовательности](https://en.wikipedia.org/wiki/Longest_common_subsequence_problem), 
-но это необязательно. Требуется самостоятельно разработать и описать пользовательский 
-интерфейс программы, форматы входных и выходных данных, организовать тестирование, убедиться, 
-что программа работает с достаточно большими файлами, предоставить наборы файлов для проверки 
-корректности реализации. Разработка должна вестись регулярно, история коммитов должна отражать 
-процесс разработки, сообщения коммитов рекомендуется писать на английском языке 
-(но сообщения на русском языке также допускаются).
+The solution can be based on the algorithm [Longest Common Subsequence Search](https://en.wikipedia.org/wiki/Longest_common_subsequence_problem),
+but this is optional. It is required to independently develop and describe a custom
+program interface, input and output data formats, organize testing, make sure
+that the program works with large enough files, provide sets of files for verification
+implementation correctness.
 
